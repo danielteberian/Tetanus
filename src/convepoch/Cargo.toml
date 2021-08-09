@@ -1,0 +1,12 @@
+[package]
+name = "convepoch"
+version = "0.1.0"
+authors = ["Daniel P. Teberian"]
+edition = "2018"
+repository = "https://github.com/danielteberian/Tetanus"
+description = "Converts epoch/datetime."
+
+[dependencies]
+chrono = "0.4.6"
+derive_more = "0.14.0"
+structopt = "0.2.15"
