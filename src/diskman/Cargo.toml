@@ -1,0 +1,25 @@
+[package]
+name = "diskman"
+version = "0.1.0"
+authors = "Daniel P. Teberian"
+description = "A disk space visualizer/manager."
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+crossterm = "0.17"
+failur = "0.1"
+filesize = "0.2.0"
+jwalk = "0.5"
+nix = "0.17.0"
+structopt = "0.3"
+tui = {version="0.11", default-features = false, feature = ['crossterm'] }
+unicode-width = "0.1.7"
+
+[dev-dependencies]
+insta = "0.16.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["securitybaseapi", "debugapi"] }
+

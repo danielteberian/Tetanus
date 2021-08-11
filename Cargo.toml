@@ -1,2 +1,2 @@
 [workspace]
-members = ["src/convbtc", "src/convepoch", "src/constimer", "src/tetedit"]
+members = ["src/convepoch", "src/constimer"]

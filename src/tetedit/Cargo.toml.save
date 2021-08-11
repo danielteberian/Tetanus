@@ -1,0 +1,15 @@
+[package]
+name = "tetedit"
+version = "0.1.0"
+authors = "Daniel P. Teberian"
+description = "A small text-editor."
+edition = "2018"
+
+[dependencies]
+unicode-width = "0.1.8"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.98"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", default-features = false, features = ["wincon"

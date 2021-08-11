@@ -1,4 +1,4 @@
-# Project Title
+# Tetanus
 
 Simple overview of use/purpose.
 
