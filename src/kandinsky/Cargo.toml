@@ -1,0 +1,17 @@
+[package]
+name = "kandinsky"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+cursive_buffered_backend = { git = "https://github.com/gyscos/cursive_buffered_backend" }
+image = "0.23.12"
+regex = "1"
+
+[dependencies.cursive]
+version = "0.16"
+default-features = false
+
+[features]
+default = "cursive/termion-backend"]
+windows = ["cursive/crossterm-backend"]
