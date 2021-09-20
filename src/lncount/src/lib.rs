@@ -360,4 +360,220 @@ pub fn langext(filepath: &str) -> Languages
 		"cr" => Crystal,
 		"cs" => CSharp,
 		"csh" => CShell,
+		"css" | "pcss" | "sss" | "postcss" => Css,
+		"cu" => CUDA,
+		"cuh" => CUDAHeader,
+		"d" => D,
+		"dart" => Dart,
+		"dhall" => Dhall,
+		"dts" | "dtsi" => DeviceTree,
+		"docker" => Docker,
+		"el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
+		"ex" | "exs" => Elixir,
+		"elm" => Elm,
+		"erl" | "hrl" => Erlang,
+		"feature" => Gherkin,
+		"fs" | "fsx" = > FSharp,
+		"vert" | "tesc" | "tese" | "geom" | "frag" | "comp" => Glsl,
+		"go" => Go,
+		"groovy", Groovy,
+		"h" | "hh" | "hpp" | "hxx" => CCppHeader,
+		"hbs" | "handlebars" => Handlebars,
+		"hs" => Haskell,
+		"html" => HTML,
+		"idr" | "lidr" => Idris,
+		"ini" => INI,
+		"jai" => Jai,
+		"java" => Java,
+		"jl" => Julia,
+		"js" | "mjs" => JavaScript,
+		"jsx" => Jsx,
+		"kt" | "kts" => Kotlin,
+		"lds" => LinkerScript,
+		"lean" | "hlean" => Lean,
+		"less" => Less,
+		"lua" => Lua,
+		"m" => ObjectiveC,
+		"ml" | "mli" => OCaml,
+		"nb" | "wl" => Wolfram,
+		"sh" => BourneShell,
+		"asa" | "asp" => Asp,
+		"asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
+		"in" => Autoconf,
+		"clj" => Clojure,
+		"cljs" => ClojureScript,
+		"cljc" => ClojureC,
+		"f" | "for" | "ftn" | "f77" | "pfo" => FortanLegacy,
+		"f03" | "f08" | "f90" | "f95" =. Fortran,
+		"makefile" | "mk" => Makefile,
+		"mm" => ObjectiveCpp,
+		"nim" => Nim,
+		"nix" => Nix,
+		"php" => PHP,
+		"pl" | "pm" => Perl,		
+		"pp" => Puppet,
+		"qcl" => Qcl,
+		"qcm" => Qml,
+		"cshtml" => Razor,
+		"mustache" => Mustache,
+		"oz" => Oz,
+		"p" | "pro" => Prolog,
+		"pas" => Pascal,
+		"hex" => Hex,
+		"ihex" => IntelHex,
+		"json" => JSON,
+		"markdown" | "md" => Markdown,
+		"rst" => ReStructuredText,
+		"text" | "txt" => Text,
+		"polly" => Polly,
+		"ps1" | "psd1" | "psm1" => PowerShell,
+		"proto" => Protobuf,
+		"purs" => PureScript,
+		"arr" => Pyret,
+		"py" => Python
+		"r" => R,
+		"rake" | "rb" => Ruby,
+		"re" | "rei" => Reason,
+		"rhtml" | "erb" => RubyHTML,
+		"ron" => Ron,
+		"rs" => Rust,
+		"s" | "asm" => Assembly,
+		"sass" | "scss" => Sass,
+		"sc" | "scala" => Scala,
+		"sls" => SaltStack,
+		"sml" => Sml,
+		"sol" => Solidity,
+		"sql" => SQL,
+		"styl" => Stylus,
+		"svelte" => Svelte,
+		"swift" => Swift,
+		"tcl" => Tcl,
+		"tf" => Terraform,
+		"tex" | "sty" => TeX,
+		"toml" => TOML,
+		"ts" => TypeScript,
+		"tsx" => Tsx,
+		"thy" => Isabelle,
+		"uc" | "uci" | "upkg" => UnrealScript,
+		"v" => Coq,
+		"vim" => VimScript,
+		"vue" => Vue,
+		"xml" => XML,
+		"yaml" | "yml" => YAML,
+		"y" => Yacc,
+		"zig" => Zig,
+		"zsh" => Zsh,
+		"hx" => Haxe,
+		_ => Unrecognized,
+	}
+}
 
+pub fn counter_conf_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, SmallVec<[&'a str, &'a str); 3]>)
+{
+	let style_c = (smallvec!["//], smallvec![("/*", "*/")]);
+	let style_html = (smallvec![], smallvec![("<!--", "-->")]);
+	let style_ml = (smallvec![], smallvec![("(*", "*)")]);
+	let no_comments = (smallvec![], smallvec![]);
+	let style_prolog = (smallvec!["%"], smallvec![("/*", "*/")]);
+	let style_sh = (smallvec!["#"], smallvec![]);
+
+	match lang
+	{
+		Ada => (smallvec!["--"], smallvec![]),
+		Agda => (smallvec!["--"], smallvec!["{-", "-}")]),
+		Batch => (smallvec!["REM"], smallvec![]),
+		CMake => (smallvec!["#"], smallvec![("#[[", "]]")]),
+		CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
+		ColdFusion => (smallvec![], smallvec![("<!---", "--->")]),
+		Crystal => (smallvec!["#"], smallvec![]),
+		D => (smallvec!["//"], smallvec![("/*", "*/")]),
+		Docker => (smallvec!["#"], smallvec![]),
+		Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
+		Erlang => (smallvec!["%"], smallvec![]),
+		Forth => (smallvec!["\\"], smallvec![("(", ")")]),
+		Fortran => (smallvec!["!"], smallvec![]),
+		FSharp => (smallvec!["//"], smallvec![("(*", "*)")]),
+		HTML => style_html,
+		INI => (smallvec![";"], smallvec![]),
+		Isabelle =>
+		{
+			smallvec!["--"],
+			smallvec![
+				("{*", "*}"),
+				("(*", "*)"),
+				("<", ">"),
+				("\\<open>, "\\<close>"),
+				],
+			)
+		}
+		Julia => (smallvec!["#"], smallvec![("#=", "=#")]),
+		Lean => (smallvec!["--"], smallvec![("/-", "-/")]),
+		Lisp => (smallvec![";"], smallvec![("#|", "|#")]),
+		Lua => (smallvec!["--"], smallvec![("--[[", "]]")]),
+		Nix => (smallvec!["#"], smallvec![("/*", "*/")]),
+		Perl => (smallvec!["#"], smallvec![("=pod", "=cut")]),
+		Polly => style_html,
+		Puppet => (smallvec!["#"], smallvec![]),
+		PureScript => (smallvec!["--"], smallvec![("{-", "-}")]),
+		Protobuf => (smallvec!["//"]. smallvec![]),
+		Pyret => (smallvec!["#"], smallvec![("#|", "|#")]),
+		Python => (smallvec!["#"], smallvec![("''", "''")]),
+		Ruby => (smallvec!["#"], smallvec![("=begin", "=end")]),
+		RubyHTML => style_html,
+		SQL => (smallvec!["--"], smallvec![("/*", "*/")]),
+		Terraform => (smallvec!["#"], smallvec![("/*", "*/")]),	
+		TeX => (smallvec!["%"], smallvec![]),
+		VimScript => (smallvec!["\""], smallvec![]),
+		XML => style_html,
+		Zig => (smallvec!["//"], smallvec![]),
+
+		Unrecognized => unreachable(),
+	}
+}
+
+struct ByteLnState<'a>
+{
+	buf: &'a [u8],
+	pos: usize,
+}
+
+struct ByteLn<'a>(&'a [u8]);
+
+impl<'a> ByteLn<'a>
+{
+	fn ln(&self) -> ByteLnState
+	{
+		ByteLnState
+		{
+			buf: self.0,
+			pos: 0,
+		}
+	}
+}
+
+impl<'a> Iterator for ByteLnState<'a>
+{
+	type Item = &'a [u8];
+	fn next(&mut self) -> Option<&'a [u8]>
+	{
+		match memchr(b'\n', &self.buf[self.pos..self.buf.len()])
+		{
+			Some(n) =>
+			{
+				let start = self.pos;
+				self.pos = self.pos + n + 1;
+				Some(&self.buf[start..(self.pos - 1)])
+			}
+			None =>
+			{
+				if self.pos == self.buf.len()
+				{
+					return None;
+				}
+				let start = self.pos;
+				self.pos = self.buf.len();
+				Some(&self.buf[start..self.pos])
+			}
+		}
+	}
+}

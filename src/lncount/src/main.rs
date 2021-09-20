@@ -104,3 +104,187 @@ impl FromStr for Sort
 		}
 	}
 }
+
+fn main()
+{
+	let matches = App::new("lncount")
+		.global_settings(&[AppSettings::ColoredHelp])
+		.version(crate_version!())
+		.author("Daniel P. Teberian")
+		.about("A utility to count lines in selected files. This is a part of Tetanus.")
+		.arg(Arg::with_name("exclude")
+			.required(false)
+			.multiple(true)
+			.long("exclude")
+			.value_name("REGEX")
+			.takes_value(true)
+			.help("I don't know what to write here."))
+		.arg(Arg::with_name("include")
+			.required(false)
+			.multiple(true)
+			.long("include")
+			.value_name("REGEX")
+			.takes_value(true)
+			.help("Regex files to be included."))
+		.arg(Arg::with_name("files")
+			.required(false)
+			.long("files")
+			.takes_value(false)
+			.help("Display statistics about individual files."))
+		.arg(Arg::with_name("sort")
+			.required(false)
+			.long("sort")
+			.value_name("COLUMN")
+			.takes_value(true)
+			.help("Column used to sort"))
+		.arg(Arg::with_name("unrestricted")
+			.required(false)
+			.multiple(true)
+			.long("unrestricted")
+			.short("u")
+			.takes_value(false)
+			.help("TODO"))
+		.arg(Arg::with_name("target")
+			.multiple(true)
+			.help("The file(s)/directory/directories to include in the counting process. Multiple arguments can be provided."))
+		.get_matches();
+	
+		let tgt = match matches.values_of("target")
+		{
+			Some(tgt) => tgt.collect(),
+			None => vec!["."]
+		};
+
+		let sort: Sort = match matches.value_of("sort")
+		{
+			Some(string) => match Sort::from_str(string)
+			{
+				Ok(sort) => sort,
+				Err(err) =>
+				{
+					if let Some(suggestion) = err
+					{
+						println!("[ERR] INVALID ARGUMENT: '{}'",
+							string, suggestion);
+					}
+					else
+					{
+						println!("[ERR] INVALID ARGUMENT: '{}'", string);
+					}
+					return
+				},
+			},
+			None => Sort::Code,
+		};
+
+		let by_file: bool = matches.is_present("files");
+		if by_file && (sort == Sort::Language || sort == Sort::Files)
+		{
+			println!("[ERR] CANNOT SORT BY LANGUAGE IF THE --FILES ARGUMENT HAS BEEN INVOKED");
+			return
+		}
+
+		let (use_ignore, ignore_hidden) = match matches.occurrences_of("unrestricted")
+		{
+			0 => (true, true),
+			1 => (false, true),
+			2 => (false, false),
+			_ => (false, false),
+		};
+
+		let exclude_regex = match matches.values_of("exclude")
+		{
+			Some(regex_strs) =>
+			{
+				let combined_regex = regex_strs.map(|r| format!("({})", r)).collect::<Vec<String>>().join("|");
+				match Regex::new(&combined_regex)
+				{
+					Ok(r) => Some(r),
+					Err(e) ->
+					{
+						println!("[ERR] COULD NOT PROCESS EXCLUDE REGEX: {}", e);
+						std::process::exit(1);
+					}
+				}
+			}
+			None => None,
+		};
+		let include_regex = match matches.values_of("include")
+		{
+			Some(regex_strs) =>
+			{
+				let combined_regex = regex_strs.map(|r| format!("({})", r)).collect::<Vec<String>>().join("|");
+				match Regex::new(&combined_regex)
+				{
+					Ok(r) => Some(r),
+					Err(e) =>
+					{
+						println!("[ERR] COULD NOT PROCESS INCLUDE REGEX: {}", e);
+						std::process::exit(1);
+					}
+				}
+			}
+			None => None,
+		};
+
+		let threads = num_cpus::get();
+		let mut workers = vec![];
+		let (workq, stealer) = deque::new();
+		for _ in 0..threads
+		{
+			let worker = Worker
+			{
+				chan: stealer.clone()
+			};
+			workers.push(thread::spawn(|| worker.run()));
+		}
+		for target in tgt
+		{
+			let walker = WalkBuilder::new(target).ignore(use_ignore)
+								.git_ignore(use_ignore)
+								.git_exclude(use_ignore)
+								.hidden(ignore_hidden)
+								.build();
+			let files = walker
+				.filter_map(Result::ok)
+				.filter(|entry| entry.file_type().expect("NO FILETYPE").is_file())
+				.map(|entry| String::from(entry.path().to_str().unwrap()))
+				.filter(|path| match include_regex
+				{
+					None => true,
+					Some(ref include) => include.is_match(path),
+				})
+				.filter(|path| match exclude_regex
+				{
+					None => true,
+					Some(ref exclude) => !exclude.is_match(path),
+				});
+			for path in files
+			{
+				workq.push(Work::File(path));
+			}
+		}
+
+		for _ in 0..workers.len()
+		{
+			workq.push(Work::Quit);
+		}
+
+		let mut filecnt: Vec<FileCount> = Vec::new();
+		for worker in workers
+		{
+			filecnt.extend(worker.join().unwrap().iter().cloned())
+		}
+
+		let mut by_lang: HashMap<Lang, Vec<FileCount>> = HashMap::new();
+		for fc in filecnt
+		{
+			match by_lang.entry(fc.lang)
+			{
+				Entry::Occupied(mut elem) => elem.get_mut().push(fc),
+				Entry::Vacant(elem) =>
+				{
+					elem.insert(vec![fc]);
+				}
+			};
+		}
